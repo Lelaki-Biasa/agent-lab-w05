@@ -1,0 +1,62 @@
+[
+  {
+    "source": "announcement.txt",
+    "destination": "announcements/announcement.txt",
+    "reason": "活動通知公告，屬對外宣傳通知文件。與 announcement_copy.txt 內容相同。"
+  },
+  {
+    "source": "announcement_copy.txt",
+    "destination": "announcements/announcement_copy.txt",
+    "reason": "活動通知公告副本，與 announcement.txt 完全一致，保留副本備查。"
+  },
+  {
+    "source": "poster_text.txt",
+    "destination": "announcements/poster_text.txt",
+    "reason": "海報短文文案，屬宣傳素材。"
+  },
+  {
+    "source": "budget_draft.txt",
+    "destination": "logistics/budget_draft.txt",
+    "reason": "紙張預算草案，屬總務財務待審項目。"
+  },
+  {
+    "source": "equipment_backup.txt",
+    "destination": "logistics/equipment_backup.txt",
+    "reason": "器材清單備份，與 equipment_list.txt 內容完全一致，保留副本供比對。"
+  },
+  {
+    "source": "equipment_list.txt",
+    "destination": "logistics/equipment_list.txt",
+    "reason": "社團器材盤點清單，屬總務物資管理文件。"
+  },
+  {
+    "source": "meeting_notes.txt",
+    "destination": "meetings/meeting_notes.txt",
+    "reason": "幹部例行會議紀錄，載明場地待決議事項。"
+  },
+  {
+    "source": "feedback_questions.txt",
+    "destination": "meetings/feedback_questions.txt",
+    "reason": "活動問卷與回饋問題清單，屬會議檢討與反饋資料。"
+  },
+  {
+    "source": "next_steps.txt",
+    "destination": "proposals/next_steps.txt",
+    "reason": "後續規劃指引，提示比對兩份企劃案且未預設核准。"
+  },
+  {
+    "source": "proposal_final.txt",
+    "destination": "proposals/proposal_final.txt",
+    "reason": "企劃第一版（室外活動，30分鐘），尚未核准，與 final2 內容不同，完整保留。"
+  },
+  {
+    "source": "proposal_final2.txt",
+    "destination": "proposals/proposal_final2.txt",
+    "reason": "企劃第二版（室內活動，20分鐘），等待確認，與 final 內容不同，完整保留。"
+  },
+  {
+    "source": "rain_plan.txt",
+    "destination": "proposals/rain_plan.txt",
+    "reason": "雨天備案措施，屬活動企劃延伸應變計畫。"
+  }
+]
