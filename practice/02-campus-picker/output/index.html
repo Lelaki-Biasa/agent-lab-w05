@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課間我想做什麼？ / What to do between classes?</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 1.5rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .header {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .lang-toggle-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--primary);
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .lang-toggle-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .disclaimer {
+      display: inline-block;
+      font-size: 0.85rem;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #1e293b;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+    select {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      background: #ffffff;
+      color: var(--text);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+    button.btn-primary {
+      flex: 2;
+      min-width: 140px;
+      padding: 0.75rem 1.25rem;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button.btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    button.btn-secondary {
+      flex: 1;
+      min-width: 110px;
+      padding: 0.75rem 1rem;
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.btn-secondary:hover {
+      background: #cbd5e1;
+    }
+    .result-box {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      border-radius: 8px;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+    }
+    .result-box.has-result {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+    }
+    .result-box.no-match {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: var(--danger);
+      font-weight: 600;
+      text-align: center;
+    }
+    .result-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 0.5rem;
+    }
+    .result-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      font-weight: 500;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .history-item {
+      padding: 0.75rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .history-item-left {
+      font-weight: 600;
+    }
+    .history-item-right {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .empty-history {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+    .btn-clear {
+      padding: 0.35rem 0.7rem;
+      background: #fee2e2;
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-clear:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <button id="langToggle" class="lang-toggle-btn" type="button">EN</button>
+      <h1 id="appTitle">課間我想做什麼？</h1>
+      <span id="disclaimerText" class="disclaimer">教學模擬活動，不是校方公告</span>
+    </header>
+
+    <main class="card">
+      <h2 id="filterHeading" class="section-title">篩選條件</h2>
+
+      <div class="form-group">
+        <label id="lblLocation" for="locationSelect">活動地點</label>
+        <select id="locationSelect">
+          <option value="all">不限</option>
+          <option value="indoor">室內 (indoor)</option>
+          <option value="outdoor">室外 (outdoor)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label id="lblTime" for="timeSelect">可用時間</label>
+        <select id="timeSelect">
+          <option value="15">15 分鐘</option>
+          <option value="30" selected>30 分鐘</option>
+          <option value="60">60 分鐘</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label id="lblEnergy" for="energySelect">活動強度</label>
+        <select id="energySelect">
+          <option value="all">不限</option>
+          <option value="low">低 (low)</option>
+          <option value="medium">中 (medium)</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button id="pickBtn" class="btn-primary" type="button">幫我選</button>
+        <button id="resetBtn" class="btn-secondary" type="button">重設篩選</button>
+      </div>
+
+      <div id="resultContainer" class="result-box">
+        <span id="defaultPrompt" style="color: var(--text-muted); text-align: center;">請設定條件並按「幫我選」</span>
+      </div>
+    </main>
+
+    <section class="card">
+      <div class="history-header">
+        <h2 id="historyHeading" class="section-title" style="margin-bottom: 0;">最近抽選紀錄 (上限 5 筆)</h2>
+        <button id="clearHistoryBtn" class="btn-clear" type="button">清除紀錄</button>
+      </div>
+      <ul id="historyList" class="history-list">
+        <li class="empty-history" id="emptyHistoryMsg">尚無紀錄</li>
+      </ul>
+    </section>
+  </div>
+
+  <script>
+    // Embedded activities data
+    const activitiesData = [
+      {
+        "id": "A01",
+        "name_zh": "整理書包",
+        "name_en": "Organize your bag",
+        "location_type": "indoor",
+        "minutes": 10,
+        "energy": "low"
+      },
+      {
+        "id": "A02",
+        "name_zh": "畫一張小卡",
+        "name_en": "Draw a small card",
+        "location_type": "indoor",
+        "minutes": 15,
+        "energy": "low"
+      },
+      {
+        "id": "A03",
+        "name_zh": "寫三句讀書筆記",
+        "name_en": "Write three study notes",
+        "location_type": "indoor",
+        "minutes": 10,
+        "energy": "low"
+      },
+      {
+        "id": "A04",
+        "name_zh": "安靜讀兩頁書",
+        "name_en": "Read two pages quietly",
+        "location_type": "indoor",
+        "minutes": 15,
+        "energy": "low"
+      },
+      {
+        "id": "A05",
+        "name_zh": "排好明日待辦",
+        "name_en": "Plan tomorrow’s tasks",
+        "location_type": "indoor",
+        "minutes": 20,
+        "energy": "low"
+      },
+      {
+        "id": "A06",
+        "name_zh": "整理本機練習檔",
+        "name_en": "Organize practice files",
+        "location_type": "indoor",
+        "minutes": 30,
+        "energy": "medium"
+      },
+      {
+        "id": "A07",
+        "name_zh": "在合適位置慢走",
+        "name_en": "Take a gentle walk in a suitable area",
+        "location_type": "outdoor",
+        "minutes": 15,
+        "energy": "low"
+      },
+      {
+        "id": "A08",
+        "name_zh": "觀察天空並畫草圖",
+        "name_en": "Observe the sky and sketch",
+        "location_type": "outdoor",
+        "minutes": 20,
+        "energy": "low"
+      },
+      {
+        "id": "A09",
+        "name_zh": "在合適位置快走",
+        "name_en": "Take a brisk walk in a suitable area",
+        "location_type": "outdoor",
+        "minutes": 30,
+        "energy": "medium"
+      },
+      {
+        "id": "A10",
+        "name_zh": "規劃小組練習",
+        "name_en": "Plan a group exercise",
+        "location_type": "indoor",
+        "minutes": 45,
+        "energy": "medium"
+      },
+      {
+        "id": "A11",
+        "name_zh": "記錄自然色彩",
+        "name_en": "Record colors in nature",
+        "location_type": "outdoor",
+        "minutes": 45,
+        "energy": "low"
+      },
+      {
+        "id": "A12",
+        "name_zh": "構思下一次社團活動",
+        "name_en": "Brainstorm a future club activity",
+        "location_type": "indoor",
+        "minutes": 60,
+        "energy": "medium"
+      }
+    ];
+
+    let currentLang = 'zh';
+    let history = []; // Max 5 items, newest first
+
+    const i18n = {
+      zh: {
+        toggleBtn: 'EN',
+        appTitle: '課間我想做什麼？',
+        disclaimer: '教學模擬活動，不是校方公告',
+        filterHeading: '篩選條件',
+        lblLocation: '活動地點',
+        optLocAll: '不限',
+        optLocIndoor: '室內 (indoor)',
+        optLocOutdoor: '室外 (outdoor)',
+        lblTime: '可用時間',
+        optTime15: '15 分鐘',
+        optTime30: '30 分鐘',
+        optTime60: '60 分鐘',
+        lblEnergy: '活動強度',
+        optEnergyAll: '不限',
+        optEnergyLow: '低 (low)',
+        optEnergyMedium: '中 (medium)',
+        btnPick: '幫我選',
+        btnReset: '重設篩選',
+        defaultPrompt: '請設定條件並按「幫我選」',
+        noMatch: '沒有符合條件的活動',
+        historyHeading: '最近抽選紀錄 (上限 5 筆)',
+        btnClear: '清除紀錄',
+        emptyHistory: '尚無紀錄',
+        labelId: '活動ID',
+        labelTime: '時間',
+        labelLoc: '地點',
+        labelEnergy: '強度',
+        locMap: { indoor: '室內', outdoor: '室外' },
+        energyMap: { low: '低強度', medium: '中強度' }
+      },
+      en: {
+        toggleBtn: '中文',
+        appTitle: 'What to do between classes?',
+        disclaimer: 'Teaching simulation activities, not official university announcements',
+        filterHeading: 'Filter Options',
+        lblLocation: 'Location',
+        optLocAll: 'All',
+        optLocIndoor: 'Indoor',
+        optLocOutdoor: 'Outdoor',
+        lblTime: 'Available Time',
+        optTime15: '15 mins',
+        optTime30: '30 mins',
+        optTime60: '60 mins',
+        lblEnergy: 'Energy Level',
+        optEnergyAll: 'All',
+        optEnergyLow: 'Low',
+        optEnergyMedium: 'Medium',
+        btnPick: 'Help me choose',
+        btnReset: 'Reset filters',
+        defaultPrompt: 'Set filters and click "Help me choose"',
+        noMatch: 'No matching activities found',
+        historyHeading: 'Recent Picks (Max 5)',
+        btnClear: 'Clear history',
+        emptyHistory: 'No history yet',
+        labelId: 'ID',
+        labelTime: 'Time',
+        labelLoc: 'Location',
+        labelEnergy: 'Energy',
+        locMap: { indoor: 'Indoor', outdoor: 'Outdoor' },
+        energyMap: { low: 'Low', medium: 'Medium' }
+      }
+    };
+
+    // DOM Elements
+    const langToggleBtn = document.getElementById('langToggle');
+    const appTitle = document.getElementById('appTitle');
+    const disclaimerText = document.getElementById('disclaimerText');
+    const filterHeading = document.getElementById('filterHeading');
+    const lblLocation = document.getElementById('lblLocation');
+    const locationSelect = document.getElementById('locationSelect');
+    const lblTime = document.getElementById('lblTime');
+    const timeSelect = document.getElementById('timeSelect');
+    const lblEnergy = document.getElementById('lblEnergy');
+    const energySelect = document.getElementById('energySelect');
+    const pickBtn = document.getElementById('pickBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultContainer = document.getElementById('resultContainer');
+    const historyHeading = document.getElementById('historyHeading');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const historyList = document.getElementById('historyList');
+
+    let currentResult = null; // Store current picked item or 'no-match'
+
+    function updateLanguage() {
+      const t = i18n[currentLang];
+      langToggleBtn.textContent = t.toggleBtn;
+      appTitle.textContent = t.appTitle;
+      disclaimerText.textContent = t.disclaimer;
+      filterHeading.textContent = t.filterHeading;
+      lblLocation.textContent = t.lblLocation;
+      locationSelect.options[0].text = t.optLocAll;
+      locationSelect.options[1].text = t.optLocIndoor;
+      locationSelect.options[2].text = t.optLocOutdoor;
+
+      lblTime.textContent = t.lblTime;
+      timeSelect.options[0].text = t.optTime15;
+      timeSelect.options[1].text = t.optTime30;
+      timeSelect.options[2].text = t.optTime60;
+
+      lblEnergy.textContent = t.lblEnergy;
+      energySelect.options[0].text = t.optEnergyAll;
+      energySelect.options[1].text = t.optEnergyLow;
+      energySelect.options[2].text = t.optEnergyMedium;
+
+      pickBtn.textContent = t.btnPick;
+      resetBtn.textContent = t.btnReset;
+      historyHeading.textContent = t.historyHeading;
+      clearHistoryBtn.textContent = t.btnClear;
+
+      renderResult();
+      renderHistory();
+    }
+
+    function renderResult() {
+      const t = i18n[currentLang];
+      if (!currentResult) {
+        resultContainer.className = 'result-box';
+        resultContainer.innerHTML = `<span style="color: var(--text-muted); text-align: center;">${t.defaultPrompt}</span>`;
+        return;
+      }
+
+      if (currentResult === 'no-match') {
+        resultContainer.className = 'result-box no-match';
+        resultContainer.innerHTML = `<div>${t.noMatch}</div>`;
+        return;
+      }
+
+      const act = currentResult;
+      const name = currentLang === 'zh' ? act.name_zh : act.name_en;
+      const loc = t.locMap[act.location_type] || act.location_type;
+      const energy = t.energyMap[act.energy] || act.energy;
+
+      resultContainer.className = 'result-box has-result';
+      resultContainer.innerHTML = `
+        <div class="result-title">[${act.id}] ${name}</div>
+        <div class="result-badges">
+          <span class="badge">${t.labelId}: ${act.id}</span>
+          <span class="badge">${t.labelTime}: ${act.minutes} ${currentLang === 'zh' ? '分鐘' : 'mins'}</span>
+          <span class="badge">${t.labelLoc}: ${loc}</span>
+          <span class="badge">${t.labelEnergy}: ${energy}</span>
+        </div>
+      `;
+    }
+
+    function renderHistory() {
+      const t = i18n[currentLang];
+      historyList.innerHTML = '';
+      if (history.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'empty-history';
+        li.textContent = t.emptyHistory;
+        historyList.appendChild(li);
+        return;
+      }
+
+      history.forEach((act) => {
+        const name = currentLang === 'zh' ? act.name_zh : act.name_en;
+        const loc = t.locMap[act.location_type] || act.location_type;
+        const energy = t.energyMap[act.energy] || act.energy;
+
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.innerHTML = `
+          <div class="history-item-left">[${act.id}] ${name}</div>
+          <div class="history-item-right">${act.minutes}m · ${loc} · ${energy}</div>
+        `;
+        historyList.appendChild(li);
+      });
+    }
+
+    function pickActivity() {
+      const selectedLocation = locationSelect.value;
+      const maxMinutes = parseInt(timeSelect.value, 10);
+      const selectedEnergy = energySelect.value;
+
+      const filtered = activitiesData.filter(act => {
+        const matchLoc = selectedLocation === 'all' || act.location_type === selectedLocation;
+        const matchTime = act.minutes <= maxMinutes;
+        const matchEnergy = selectedEnergy === 'all' || act.energy === selectedEnergy;
+        return matchLoc && matchTime && matchEnergy;
+      });
+
+      if (filtered.length === 0) {
+        currentResult = 'no-match';
+        // Note: Failed picks must not be added to history
+      } else {
+        const randomIndex = Math.floor(Math.random() * filtered.length);
+        const chosen = filtered[randomIndex];
+        currentResult = chosen;
+
+        // Add to history (max 5 items, newest first)
+        history.unshift(chosen);
+        if (history.length > 5) {
+          history = history.slice(0, 5);
+        }
+      }
+
+      renderResult();
+      renderHistory();
+    }
+
+    function resetFilters() {
+      locationSelect.value = 'all';
+      timeSelect.value = '30';
+      energySelect.value = 'all';
+      // Do not clear history!
+    }
+
+    function clearHistory() {
+      history = [];
+      renderHistory();
+    }
+
+    // Event listeners
+    langToggleBtn.addEventListener('click', () => {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      updateLanguage();
+    });
+
+    pickBtn.addEventListener('click', pickActivity);
+    resetBtn.addEventListener('click', resetFilters);
+    clearHistoryBtn.addEventListener('click', clearHistory);
+
+    // Initial render
+    updateLanguage();
+  </script>
+</body>
+</html>
