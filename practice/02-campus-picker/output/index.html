@@ -17,6 +17,14 @@
       --danger: #ef4444;
       --danger-hover: #dc2626;
       --success: #10b981;
+      --tag-indoor: #dbeafe;
+      --tag-indoor-text: #1e40af;
+      --tag-outdoor: #f3e8ff;
+      --tag-outdoor-text: #6b21a8;
+      --tag-low: #dcfce7;
+      --tag-low-text: #166534;
+      --tag-med: #fef3c7;
+      --tag-med-text: #92400e;
     }
     * {
       box-sizing: border-box;
@@ -110,11 +118,24 @@
       background: #ffffff;
       color: var(--text);
     }
+    .candidate-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .candidate-count {
+      font-weight: 700;
+      color: var(--primary);
+    }
     .actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem;
-      margin-top: 1.25rem;
+      margin-top: 0.5rem;
     }
     button.btn-primary {
       flex: 2;
@@ -127,10 +148,13 @@
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, transform 0.05s ease;
     }
     button.btn-primary:hover {
       background: var(--primary-hover);
+    }
+    button.btn-primary:active {
+      transform: scale(0.98);
     }
     button.btn-secondary {
       flex: 1;
@@ -147,6 +171,13 @@
     button.btn-secondary:hover {
       background: #cbd5e1;
     }
+    .shortcut-hint {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      text-align: right;
+    }
     .result-box {
       margin-top: 1.25rem;
       padding: 1.25rem;
@@ -157,10 +188,12 @@
       justify-content: center;
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
+      transition: all 0.2s ease;
     }
     .result-box.has-result {
       background: #ecfdf5;
       border-color: #a7f3d0;
+      animation: fadeIn 0.25s ease-out;
     }
     .result-box.no-match {
       background: #fef2f2;
@@ -168,12 +201,17 @@
       color: var(--danger);
       font-weight: 600;
       text-align: center;
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0.6; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .result-title {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: #065f46;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
     .result-badges {
       display: flex;
@@ -183,12 +221,35 @@
     }
     .badge {
       display: inline-block;
-      padding: 0.2rem 0.55rem;
-      border-radius: 4px;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      color: #374151;
-      font-weight: 500;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .badge-id {
+      background: #f1f5f9;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+    .badge-time {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .badge-indoor {
+      background: var(--tag-indoor);
+      color: var(--tag-indoor-text);
+    }
+    .badge-outdoor {
+      background: var(--tag-outdoor);
+      color: var(--tag-outdoor-text);
+    }
+    .badge-low {
+      background: var(--tag-low);
+      color: var(--tag-low-text);
+    }
+    .badge-medium {
+      background: var(--tag-med);
+      color: var(--tag-med-text);
     }
     .history-header {
       display: flex;
@@ -278,10 +339,17 @@
         </select>
       </div>
 
+      <div class="candidate-info">
+        <span id="lblCandidate">符合條件的候選活動：</span>
+        <span id="candidateCount" class="candidate-count">0</span>
+        <span id="lblItemUnit">項</span>
+      </div>
+
       <div class="actions">
         <button id="pickBtn" class="btn-primary" type="button">幫我選</button>
         <button id="resetBtn" class="btn-secondary" type="button">重設篩選</button>
       </div>
+      <span id="shortcutHint" class="shortcut-hint">提示：可直接按 Enter 鍵挑選</span>
 
       <div id="resultContainer" class="result-box">
         <span id="defaultPrompt" style="color: var(--text-muted); text-align: center;">請設定條件並按「幫我選」</span>
@@ -402,6 +470,7 @@
 
     let currentLang = 'zh';
     let history = []; // Max 5 items, newest first
+    let currentResult = null; // Store current picked item or 'no-match'
 
     const i18n = {
       zh: {
@@ -421,8 +490,11 @@
         optEnergyAll: '不限',
         optEnergyLow: '低 (low)',
         optEnergyMedium: '中 (medium)',
+        lblCandidate: '符合條件的候選活動：',
+        lblItemUnit: '項',
         btnPick: '幫我選',
         btnReset: '重設篩選',
+        shortcutHint: '提示：可直接按 Enter 鍵挑選',
         defaultPrompt: '請設定條件並按「幫我選」',
         noMatch: '沒有符合條件的活動',
         historyHeading: '最近抽選紀錄 (上限 5 筆)',
@@ -452,8 +524,11 @@
         optEnergyAll: 'All',
         optEnergyLow: 'Low',
         optEnergyMedium: 'Medium',
+        lblCandidate: 'Matching candidates:',
+        lblItemUnit: 'items',
         btnPick: 'Help me choose',
         btnReset: 'Reset filters',
+        shortcutHint: 'Tip: Press Enter key to pick directly',
         defaultPrompt: 'Set filters and click "Help me choose"',
         noMatch: 'No matching activities found',
         historyHeading: 'Recent Picks (Max 5)',
@@ -479,14 +554,34 @@
     const timeSelect = document.getElementById('timeSelect');
     const lblEnergy = document.getElementById('lblEnergy');
     const energySelect = document.getElementById('energySelect');
+    const lblCandidate = document.getElementById('lblCandidate');
+    const candidateCount = document.getElementById('candidateCount');
+    const lblItemUnit = document.getElementById('lblItemUnit');
     const pickBtn = document.getElementById('pickBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const shortcutHint = document.getElementById('shortcutHint');
     const resultContainer = document.getElementById('resultContainer');
     const historyHeading = document.getElementById('historyHeading');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const historyList = document.getElementById('historyList');
 
-    let currentResult = null; // Store current picked item or 'no-match'
+    function getFilteredActivities() {
+      const selectedLocation = locationSelect.value;
+      const maxMinutes = parseInt(timeSelect.value, 10);
+      const selectedEnergy = energySelect.value;
+
+      return activitiesData.filter(act => {
+        const matchLoc = selectedLocation === 'all' || act.location_type === selectedLocation;
+        const matchTime = act.minutes <= maxMinutes;
+        const matchEnergy = selectedEnergy === 'all' || act.energy === selectedEnergy;
+        return matchLoc && matchTime && matchEnergy;
+      });
+    }
+
+    function updateCandidateCount() {
+      const matches = getFilteredActivities();
+      candidateCount.textContent = matches.length;
+    }
 
     function updateLanguage() {
       const t = i18n[currentLang];
@@ -509,11 +604,15 @@
       energySelect.options[1].text = t.optEnergyLow;
       energySelect.options[2].text = t.optEnergyMedium;
 
+      lblCandidate.textContent = t.lblCandidate;
+      lblItemUnit.textContent = t.lblItemUnit;
       pickBtn.textContent = t.btnPick;
       resetBtn.textContent = t.btnReset;
+      shortcutHint.textContent = t.shortcutHint;
       historyHeading.textContent = t.historyHeading;
       clearHistoryBtn.textContent = t.btnClear;
 
+      updateCandidateCount();
       renderResult();
       renderHistory();
     }
@@ -537,14 +636,17 @@
       const loc = t.locMap[act.location_type] || act.location_type;
       const energy = t.energyMap[act.energy] || act.energy;
 
+      const locClass = act.location_type === 'indoor' ? 'badge-indoor' : 'badge-outdoor';
+      const energyClass = act.energy === 'low' ? 'badge-low' : 'badge-medium';
+
       resultContainer.className = 'result-box has-result';
       resultContainer.innerHTML = `
         <div class="result-title">[${act.id}] ${name}</div>
         <div class="result-badges">
-          <span class="badge">${t.labelId}: ${act.id}</span>
-          <span class="badge">${t.labelTime}: ${act.minutes} ${currentLang === 'zh' ? '分鐘' : 'mins'}</span>
-          <span class="badge">${t.labelLoc}: ${loc}</span>
-          <span class="badge">${t.labelEnergy}: ${energy}</span>
+          <span class="badge badge-id">${t.labelId}: ${act.id}</span>
+          <span class="badge badge-time">${t.labelTime}: ${act.minutes} ${currentLang === 'zh' ? '分鐘' : 'mins'}</span>
+          <span class="badge ${locClass}">${t.labelLoc}: ${loc}</span>
+          <span class="badge ${energyClass}">${t.labelEnergy}: ${energy}</span>
         </div>
       `;
     }
@@ -576,16 +678,7 @@
     }
 
     function pickActivity() {
-      const selectedLocation = locationSelect.value;
-      const maxMinutes = parseInt(timeSelect.value, 10);
-      const selectedEnergy = energySelect.value;
-
-      const filtered = activitiesData.filter(act => {
-        const matchLoc = selectedLocation === 'all' || act.location_type === selectedLocation;
-        const matchTime = act.minutes <= maxMinutes;
-        const matchEnergy = selectedEnergy === 'all' || act.energy === selectedEnergy;
-        return matchLoc && matchTime && matchEnergy;
-      });
+      const filtered = getFilteredActivities();
 
       if (filtered.length === 0) {
         currentResult = 'no-match';
@@ -610,6 +703,7 @@
       locationSelect.value = 'all';
       timeSelect.value = '30';
       energySelect.value = 'all';
+      updateCandidateCount();
       // Do not clear history!
     }
 
@@ -624,9 +718,20 @@
       updateLanguage();
     });
 
+    [locationSelect, timeSelect, energySelect].forEach(el => {
+      el.addEventListener('change', updateCandidateCount);
+    });
+
     pickBtn.addEventListener('click', pickActivity);
     resetBtn.addEventListener('click', resetFilters);
     clearHistoryBtn.addEventListener('click', clearHistory);
+
+    // Keyboard shortcut Enter
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        pickActivity();
+      }
+    });
 
     // Initial render
     updateLanguage();
